@@ -1,6 +1,6 @@
-class ChessFigure():
+class ChessPiece():
     colour: str = 'white'
-    place_figure = x, y = 5, 5
+    place_figure = x_initial, y_initial = 5, 5
 
     def change_colour(self) -> str:
         if self.colour == 'white':
@@ -9,49 +9,88 @@ class ChessFigure():
             self.colour = 'white'
         return self.colour
 
-    def valid_place(self, a, b) -> bool:
-        return 0 < a < 9 and 0 < b < 9
+    def valid_place(self, x, y) -> bool:
+        return 0 < x < 9 and 0 < y < 9
 
-    def check_potential_move(self, a, b) -> None:
+    def check_potential_move(self, x, y) -> None:
         raise NotImplementedError
 
-
-class King(ChessFigure):
-    def check_potential_move(self, a, b) -> bool:
-        if self.valid_place(a, b):
-            return abs(a - self.x) <= 1 and abs(b - self.y) <= 1
+    def move_piece(self) -> str:
+        return 'This piece has been moved'
 
 
-class Queen(ChessFigure):
-    def check_potential_move(self, a, b) -> bool:
-        if self.valid_place(a, b):
-            return abs(a - b) == abs(self.x - self.y) or a == self.x or b == self.y
+
+class King(ChessPiece):
+    def check_potential_move(self, x, y) -> bool:
+        if abs(x - self.x_initial) <= 1 and abs(y - self.y_initial) <= 1:
+            if self.valid_place(x, y):
+                 print(self.move_piece())
+            return self.valid_place(x, y)
+        else:
+            return False
 
 
-class Rook(ChessFigure):
-    def check_potential_move(self, a, b) -> bool:
-        if self.valid_place(a, b):
-            return abs(a - b) == abs(self.x - self.y)
+class Queen(ChessPiece):
+    def check_potential_move(self, x, y) -> bool:
+        if abs(x - y) == abs(self.x_initial - self.y_initial) \
+                   or x == self.x_initial or y == self.y_initial:
+            if self.valid_place(x, y):
+                 print(self.move_piece())
+            return self.valid_place(x, y)
+        else:
+            return False
 
 
-class Bishop(ChessFigure):
-    def check_potential_move(self, a, b) -> bool:
-        if self.valid_place(a, b):
-            return a == self.x or b == self.y
+class Rook(ChessPiece):
+    def check_potential_move(self, x, y) -> bool:
+        if x == self.x_initial or y == self.y_initial:
+            if self.valid_place(x, y):
+                print(self.move_piece())
+            return self.valid_place(x, y)
+        else:
+            return False
 
 
-class Knight(ChessFigure):
-    def check_potential_move(self, a, b) -> bool:
-        if self.valid_place(a, b):
-            delta_x, delta_y = abs(a - self.x), abs(b - self.y)
-            return delta_x == 1 and delta_y == 2 or delta_x == 2 and delta_y == 1
+class Rook(ChessPiece):
+    def check_potential_move(self, x, b) -> bool:
+        if self.valid_place(x, y) and x == self.x_initial or y == self.y_initial:
+            if self.valid_place(x, y):
+                print(self.move_piece())
+            return self.valid_place(x, y)
+        else:
+            return False
 
 
-class Pawn(ChessFigure):
-    def check_potential_move(self, a, b) -> bool:
-        if self.valid_place(a, b):
-            return self.colour == 'white' and a == self.x and b - self.y == 1 \
-                   or self.colour == 'black' and a == self.x and b - self.y == -1
+class Bishop(ChessPiece):
+    def check_potential_move(self, x, y) -> bool:
+        if abs(x - y) == abs(self.x_initial - self.y_initial):
+            if self.valid_place(x, y):
+                print(self.move_piece())
+            return self.valid_place(x, y)
+        else:
+            return False
+
+
+class Knight(ChessPiece):
+    def check_potential_move(self, x, y) -> bool:
+        delta_x, delta_y = abs(x - self.x_initial), abs(y - self.y_initial)
+        if (delta_x, delta_y) in [(2, 1), (1, 2)]:
+            if self.valid_place(x, y):
+                print(self.move_piece())
+            return self.valid_place(x, y)
+        else:
+            return False
+
+
+class Pawn(ChessPiece):
+    def check_potential_move(self, x, y) -> bool:
+        if self.colour == 'white' and x == self.x_initial and y - self.y_initial == 1 \
+                or self.colour == 'black' and x == self.x_initial and y - self.y_initial == -1:
+            if self.valid_place(x, y):
+                print(self.move_piece())
+            return self.valid_place(x, y)
+        else:
+            return False
 
 
 king = King()
@@ -63,32 +102,24 @@ pawn1 = Pawn()
 pawn2 = Pawn()
 pawn2.change_colour()
 
-list_of_figures = (king, queen, rook, bishop, knight, pawn1, pawn2)
-list_for_print = ('king', 'queen', 'rook', 'bishop', 'knight', 'pawn1', 'pawn2')
+list_of_pieces = (king, queen, rook, bishop, knight, pawn1, pawn2)
+
+def out_result(list_of_pieces, x, y) -> list:
+    return [piece for piece in list_of_pieces if piece.check_potential_move(x, y)]
 
 
-def out_result(list_of_figures, a, b) -> list:
-    list_answer = ([_.check_potential_move(a, b) for _ in list_of_figures])
-    zip_answer = zip(list_for_print, list_answer)
-    answer_figures = []
-    for key, value in zip_answer:
-        if value:
-            answer_figures.append(key)
-    print(answer_figures)
-
-
-a, b = 6, 6
-out_result(list_of_figures, a, b)
-a, b = 5, 6
-out_result(list_of_figures, a, b)
-a, b = 5, 10
-out_result(list_of_figures, a, b)
-a, b = -5, 6
-out_result(list_of_figures, a, b)
-a, b = 5, 16
-out_result(list_of_figures, a, b)
-a, b = 5, 4
-out_result(list_of_figures, a, b)
-a, b = 5, 1
-out_result(list_of_figures, a, b)
+x, y = 6, 6
+out_result(list_of_pieces, x, y)
+x, y = 5, 6
+out_result(list_of_pieces, x, y)
+x, y = 5, 10
+out_result(list_of_pieces, x, y)
+x, y = -5, 6
+out_result(list_of_pieces, x, y)
+x, y = 5, 16
+out_result(list_of_pieces, x, y)
+x, y = 5, 4
+out_result(list_of_pieces, x, y)
+x, y = 5, 1
+out_result(list_of_pieces, x, y)
 
