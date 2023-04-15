@@ -68,17 +68,17 @@ class ShoppingCart:
             print('Зменшили суму')
 
     def get_total(self):
-        return sum(product.get_total(quantity) for product, quantity in ShoppingCart.__iter__(self))
+        return sum(product.get_total(quantity) for product, quantity in self)
 
 
 class PaymentValidator:
     def is_valid(self):
-        return True if self.is_valid else False
+        raise NotImplementedError
 
 
 class PaymentProcessor:
     def purchase(self):
-        'XXXXXX'
+        raise NotImplementedError
 
 
 class CashPaymentValidator(PaymentValidator):
@@ -99,7 +99,7 @@ class CashPaymentProcessor(CashPaymentValidator, PaymentProcessor):
     def purchase(self, _purchased):
         if self.is_valid():
             print('Обробка готівкового платежу')
-            print('Загальна сума оплати становить :', ShoppingCart.__float__(_purchased))
+            print(f'Загальна сума оплати становить: {_purchased:.2f}')
         else:
             print('the cart is empty')
 
