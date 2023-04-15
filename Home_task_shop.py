@@ -14,7 +14,7 @@ class Product:
     def __eq__(self, other) -> bool:
         return self.name == other.name and self.price == other.price and self.unit == other.unit
 
-    def get_total(self, quantity: int | float = None) -> int:
+    def get_total(self, quantity: int | float = None):
         if quantity:
             return int(round(quantity * self.price / self.unit, 0))
         else:
@@ -43,7 +43,7 @@ class ShoppingCart:
             self.quantities[index_product] += quantity
 
     def __getitem__(self, key) -> tuple:
-        return self.products[key].__str__(), self.quantities[key]
+        return self.products[key], self.quantities[key]
 
     def __len__(self) -> int:
         return len(self.products)
@@ -54,8 +54,8 @@ class ShoppingCart:
     def remove_product(self, product: Product) -> None:
         if product in self.products:
             index_product = self.products.index(product)
-            self.products.remove(product)
-            del self.quantities[index_product]
+            self.products.pop(index_product)
+            self.quantities.pop(index_product)
         else:
             print('Sorry, we have not such product')
 
@@ -67,9 +67,8 @@ class ShoppingCart:
         else:
             print('Зменшили суму')
 
-    def get_total(self) -> float:
-        return sum([self.products[i].price*self.quantities[i]/self.products[i].unit\
-                    for i in range(self.__len__())])
+    def get_total(self):
+        return sum(product.get_total(quantity) for product, quantity in ShoppingCart.__iter__(self))
 
 
 class PaymentValidator:
@@ -98,16 +97,19 @@ class CodeValidator(PaymentValidator):
 
 class CashPaymentProcessor(CashPaymentValidator, PaymentProcessor):
     def purchase(self, _purchased):
-        self.is_valid()
-        print('Обробка готівкового платежу')
-        print('Загальна сума оплати становить :', ShoppingCart.__float__(_purchased))
-
+        if self.is_valid():
+            print('Обробка готівкового платежу')
+            print('Загальна сума оплати становить :', ShoppingCart.__float__(_purchased))
+        else:
+            print('the cart is empty')
 
 class CardPaymentProcessor(CodeValidator, PaymentProcessor):
     def purchase(self, _purchased):
-        self.is_valid()
-        print('Обробка платежу карткою')
-        print('Код безпеки :', self.security_code)
+        if self.is_valid():
+            print('Обробка платежу карткою')
+            print('Код безпеки :', self.security_code)
+        else:
+            print('wrang code')
 
 
 if __name__ == '__main__':
@@ -119,6 +121,7 @@ if __name__ == '__main__':
     cart.add_product(sweet, 0.75)
     cart.add_product(juice, 3)
     print(len(cart))
+    print('get_total', ShoppingCart.get_total(cart))
     print(cart[0])
     for cart_item, purchase in zip(cart, ((candy, 1.5), (juice, 3))):
          print('cart_item == purchase', cart_item == purchase)
@@ -128,6 +131,7 @@ if __name__ == '__main__':
     print(cart[0][1])
     cart.sub_product(juice, 2)
     print(not cart)
+
 
     # cart = ShoppingCart()
     # cart.add_product(Product("juice", 3655, 1, 1))
