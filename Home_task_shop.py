@@ -1,5 +1,4 @@
 class Product:
-
     def __init__(self, name: str, price: int, unit: float, _purchased):
         self.name = name
         self.price = price
@@ -10,7 +9,7 @@ class Product:
         return self.name
 
     def __float__(self) -> float:
-        return self.get_total()/100
+        return self.get_total() / 100
 
     def __eq__(self, other) -> bool:
         return self.name == other.name and self.price == other.price and self.unit == other.unit
@@ -23,17 +22,13 @@ class Product:
 
 
 class ShoppingCart:
-
     def __init__(self):
         self.products = []
         self.quantities = []
         self.index = 0
 
     def __float__(self) -> float:
-        return self.get_total()/100
-
-    def __bool__(self) -> bool:
-        return True if self.products else False
+        return self.get_total() / 100
 
     def __eq__(self, other) -> bool:
         return self.products == other.products and self.quantities == other.quantities
@@ -48,18 +43,13 @@ class ShoppingCart:
             self.quantities[index_product] += quantity
 
     def __getitem__(self, key) -> tuple:
-        return (self.products[key], self.quantities[key])
+        return self.products[key].__str__(), self.quantities[key]
 
     def __len__(self) -> int:
         return len(self.products)
 
     def __iter__(self):
-        return self
-
-    def __next__(self):
-        while self.index < len(self)+1:
-            self.index += 1
-        return self.products[self.index-2]
+        return zip(self.products, self.quantities)
 
     def remove_product(self, product: Product) -> None:
         if product in self.products:
@@ -77,12 +67,9 @@ class ShoppingCart:
         else:
             print('Зменшили суму')
 
-
     def get_total(self) -> float:
-        len_products = len(self.quantities)
         return sum([self.products[i].price*self.quantities[i]/self.products[i].unit\
-                    for i in range(len_products)])
-
+                    for i in range(self.__len__())])
 
 
 class PaymentValidator:
@@ -106,19 +93,19 @@ class CodeValidator(PaymentValidator):
 
     def is_valid(self):
         client_code = input('Please, input your code')
-        return True if client_code == self.security_code else False
+        return client_code == self.security_code
 
 
 class CashPaymentProcessor(CashPaymentValidator, PaymentProcessor):
-
     def purchase(self, _purchased):
+        self.is_valid()
         print('Обробка готівкового платежу')
         print('Загальна сума оплати становить :', ShoppingCart.__float__(_purchased))
 
 
-
 class CardPaymentProcessor(CodeValidator, PaymentProcessor):
     def purchase(self, _purchased):
+        self.is_valid()
         print('Обробка платежу карткою')
         print('Код безпеки :', self.security_code)
 
@@ -133,8 +120,8 @@ if __name__ == '__main__':
     cart.add_product(juice, 3)
     print(len(cart))
     print(cart[0])
-    # for cart_item, purchase in zip(cart, ((candy, 1.5), (juice, 3))):
-    #      print(cart_item == purchase)
+    for cart_item, purchase in zip(cart, ((candy, 1.5), (juice, 3))):
+         print('cart_item == purchase', cart_item == purchase)
     cart.remove_product(candy)
     print(len(cart))
     cart.sub_product(juice, 2)
